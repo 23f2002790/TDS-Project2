@@ -20,7 +20,7 @@ import time
 # ========== CONFIGURATION ========== #
 API_URL = "http://localhost:7860"
 STUDENT_EMAIL = "23f2002790@ds.study.iitm.ac.in"  # <-- CHANGE THIS
-SECRET_KEY = "YOUR_SECRET_HERE"        # <-- CHANGE THIS
+SECRET_KEY = "gVb8DxSnOIjWjceNv0VUpH8YkZOSenjO"        # <-- CHANGE THIS
 DEMO_QUIZ_URL = "https://tds-llm-analysis.s-anand.net/demo"
 
 # =================================== #

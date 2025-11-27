@@ -2,38 +2,26 @@ from typing import List
 from langchain_core.tools import tool
 import subprocess
 
-
 @tool
 def add_dependencies(dependencies: List[str]) -> str:
     """
-    Install additional Python packages if required by a quiz task.
-
-    Used only when the LLM determines that a package is missing.
-    Example: ["matplotlib", "tabula-py"]
+    Install additional Python dependencies dynamically using uv add
     """
-
-    if not dependencies:
-        return "No dependencies provided."
-
     try:
-        print(f"\n📦 Installing missing packages: {dependencies}\n")
-
-        # Using 'python -m pip install' for max compatibility
-        cmd = ["python", "-m", "pip", "install"] + dependencies
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
+        subprocess.check_call(
+            ["uv", "add"] + dependencies,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True
         )
+        return "Successfully installed dependencies: " + ", ".join(dependencies)
 
-        if result.returncode == 0:
-            return f"Successfully installed: {', '.join(dependencies)}"
-        else:
-            return (
-                "Package installation failed.\n"
-                f"Exit Code: {result.returncode}\n"
-                f"Output: {result.stderr}"
-            )
+    except subprocess.CalledProcessError as e:
+        return (
+            "Dependency installation failed.\n"
+            f"Exit code: {e.returncode}\n"
+            f"Error: {e.stderr or 'No error output.'}"
+        )
 
     except Exception as e:
-        return f"Unexpected error while installing: {str(e)}"
+        return f"Unexpected error: {e}"
