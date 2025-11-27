@@ -1,0 +1,65 @@
+# ----------------------------------------
+# Python cache & bytecode
+# ----------------------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# ----------------------------------------
+# Build and distribution
+# ----------------------------------------
+build/
+dist/
+*.egg-info/
+*.egg
+wheels/
+
+# ----------------------------------------
+# Virtual environments (any name & folder)
+# ----------------------------------------
+venv/
+.venv/
+env/
+.env/
+*/venv/
+*/.venv/
+*/env/
+*/.env/
+
+# Pipenv / Poetry / uv artifacts
+Pipfile.lock
+poetry.lock
+uv.lock
+
+# Hugging Face / Hosting configs
+*.env.production
+*.secrets
+secrets.json
+
+# ----------------------------------------
+# Local data produced by agent
+# ----------------------------------------
+LLMFiles/
+downloads/
+temp/
+tmp/
+*.csv
+*.txt
+*.zip
+*.pdf
+*.json
+*.xlsx
+
+# ----------------------------------------
+# Playwright browser downloads/cache
+# ----------------------------------------
+playwright/
+ms-playwright/
+*.log
+
+# ----------------------------------------
+# OS + Editor Files
+# ----------------------------------------
+.vscode/
+*.swp
