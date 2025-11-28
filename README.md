@@ -148,7 +148,7 @@ Before you begin, ensure you have:
 ### 1️⃣ Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/llm-quiz-solver.git
+git clone https://github.com/23f2002790/TDS-Project2.git
 cd llm-quiz-solver
 ```
 
@@ -539,10 +539,7 @@ Contributions are welcome! Please:
 
 For questions or support:
 
-- 📧 Email: your.email@ds.study.iitm.ac.in
-- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/llm-quiz-solver/issues)
-- 💬 Discussions: [GitHub Discussions](https://github.com/yourusername/llm-quiz-solver/discussions)
-
+- 📧 Email: 23f2002790@ds.study.iitm.ac.in
 ---
 
 <div align="center">
