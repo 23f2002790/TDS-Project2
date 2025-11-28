@@ -20,10 +20,12 @@ COPY . .
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONIOENCODING=utf-8
 
-# --- Install dependencies from requirements.txt ---
+# --- Install dependencies ---
 RUN pip install --no-cache-dir -r requirements.txt
 
-EXPOSE 7860
+# Railway will inject a PORT env var
+ENV PORT=7860
+EXPOSE $PORT
 
-# Run server inside container
-CMD ["uv", "run", "main.py"]
+# --- Start FastAPI server ---
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port $PORT"]
