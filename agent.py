@@ -7,74 +7,66 @@ from langgraph.prebuilt import ToolNode
 from langgraph.graph.message import add_messages
 from langchain_core.rate_limiters import InMemoryRateLimiter
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.chat_models import init_chat_model
 
-# Tools for handling quiz steps
+# Gemini LLM client
+from langchain_google_genai import ChatGoogleGenerativeAI
+
+# Tools from your tasks folder
 from tasks import (
     get_rendered_html,
     download_file,
     post_request,
     run_code,
-    add_dependencies
+    add_dependencies,
 )
 
-# Load .env credentials
+# Load keys from HuggingFace secrets
 load_dotenv()
 EMAIL = os.getenv("STUDENT_EMAIL")
 SECRET = os.getenv("SECRET")
+GOOGLE_KEY = os.getenv("GOOGLE_API_KEY")
 
-# Recursion limit to allow multi-step task solving
 RECURSION_LIMIT = 10000
 
 
-# Agent state maintains conversation history
+# Graph State Representation
 class AgentState(TypedDict):
     messages: Annotated[List, add_messages]
 
 
-# Available execution tools
+# Tools allowed for execution
 TASK_TOOLS = [
     get_rendered_html,
     download_file,
     post_request,
     run_code,
-    add_dependencies
+    add_dependencies,
 ]
 
 
-# Gemini configuration with API rate limits
-rate_limiter = InMemoryRateLimiter(
-    requests_per_second=9 / 60,
-    max_bucket_size=9
-)
-
-model = init_chat_model(
-    model_provider="google_genai",
+# ⭐ Gemini Model Setup
+model = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",
-    rate_limiter=rate_limiter
+    api_key=GOOGLE_KEY,
 ).bind_tools(TASK_TOOLS)
 
 
-# System rules control agent behavior
 SYSTEM_PROMPT = f"""
-You are an autonomous agent designed to solve multi-step quiz tasks.
-
-Instructions:
-1. Load and analyze each quiz page carefully.
-2. Follow exactly the instructions provided on the page.
-3. Submit solutions only to the endpoint specified on that page.
-4. Include only required fields in submissions.
-5. When a server response provides a new URL, fetch it immediately.
-6. Continue until no further URL is returned.
-7. Only then reply with: END
-
-Credentials to include when required:
-- EMAIL = {EMAIL}
-- SECRET = {SECRET}
-
-Avoid hallucinating URLs, endpoints, fields, values, or formats.
-Retry if incorrect while within allowed delay.
-Do not terminate early under any circumstance.
+You are an autonomous IITM quiz solver agent.
+Rules:
+1️⃣ Load the quiz URL received as USER input.
+2️⃣ Use tools only when needed:
+   - Fetch HTML: get_rendered_html
+   - Download & inspect files: download_file
+   - Execute python: run_code
+   - Submit answers: post_request
+   - Install missing libs if required: add_dependencies
+3️⃣ Use EMAIL={EMAIL} and SECRET={SECRET} when submission requires them.
+4️⃣ Continue solving until NO "url" is returned by quiz server.
+5️⃣ Final message MUST be ONLY: END
+6️⃣ Do NOT hallucinate URLs, fields, formats, or code output.
+7️⃣ If server delays are present, RETRY while time remains.
+Proceed carefully. Think step-by-step.
 """
 
 prompt = ChatPromptTemplate.from_messages([
@@ -85,39 +77,30 @@ prompt = ChatPromptTemplate.from_messages([
 pipeline = prompt | model
 
 
-# LLM inference node
+# Node: LLM reasoning step
 def llm_step(state: AgentState):
     response = pipeline.invoke({"messages": state["messages"]})
     return {"messages": state["messages"] + [response]}
 
 
-# Routing logic between LLM and tools
+# Routing logic: choose tools vs continue
 def next_action(state: AgentState):
     last_msg = state["messages"][-1]
 
-    # Tool call detection (works for AIMessage and dict)
-    tool_calls = getattr(last_msg, "tool_calls", None)
-    if tool_calls:
+    if getattr(last_msg, "tool_calls", None):
         return "tools"
 
-    # Extract content (works for both AIMessage and dict types)
     content = getattr(last_msg, "content", None)
-    if content is None and isinstance(last_msg, dict):
-        content = last_msg.get("content")
-
-    # Detect completion signal
     if isinstance(content, str) and content.strip() == "END":
         return END
 
-    # Continue LLM reasoning by default
     return "agent"
 
 
-# Build graph execution engine
+# Build the Autonomous Agent Graph
 graph = StateGraph(AgentState)
 graph.add_node("agent", llm_step)
 graph.add_node("tools", ToolNode(TASK_TOOLS))
-
 graph.add_edge(START, "agent")
 graph.add_edge("tools", "agent")
 graph.add_conditional_edges("agent", next_action)
@@ -125,13 +108,11 @@ graph.add_conditional_edges("agent", next_action)
 app = graph.compile()
 
 
-# Entry point for FastAPI background task
-def run_agent(quiz_url: str) -> None:
-    """
-    Starts solving a quiz chain beginning from the given URL.
-    """
+# 🚀 Entry point triggered by FastAPI background task
+def run_agent(quiz_url: str):
+    print(f"\n🚀 Starting from: {quiz_url}\n")
     app.invoke(
         {"messages": [{"role": "user", "content": quiz_url}]},
         config={"recursion_limit": RECURSION_LIMIT},
     )
-    print("Quiz solving completed")
+    print("\n🎯 Autonomy Complete — Task Sequence Finished\n")
