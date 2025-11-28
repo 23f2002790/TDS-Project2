@@ -11,7 +11,7 @@ from agent import run_agent
 load_dotenv()
 
 # Environment values used by IITM evaluation server
-EMAIL = os.getenv("EMAIL")
+EMAIL = os.getenv("STUDENT_EMAIL")
 SECRET = os.getenv("SECRET")
 
 app = FastAPI()

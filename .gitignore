@@ -16,7 +16,7 @@ dist/
 wheels/
 
 # ----------------------------------------
-# Virtual environments (any name & folder)
+# Virtual environments
 # ----------------------------------------
 venv/
 .venv/
@@ -27,18 +27,22 @@ env/
 */env/
 */.env/
 
-# Pipenv / Poetry / uv artifacts
+# Lock files (pipenv, poetry, uv)
 Pipfile.lock
 poetry.lock
 uv.lock
 
-# Hugging Face / Hosting configs
+# ----------------------------------------
+# Secrets / Environment files
+# ----------------------------------------
+.env
+*.env
 *.env.production
 *.secrets
 secrets.json
 
 # ----------------------------------------
-# Local data produced by agent
+# Local data generated during quiz solving
 # ----------------------------------------
 LLMFiles/
 downloads/
@@ -52,14 +56,22 @@ tmp/
 *.xlsx
 
 # ----------------------------------------
-# Playwright browser downloads/cache
+# Playwright browser storage/cache
 # ----------------------------------------
 playwright/
 ms-playwright/
 *.log
 
 # ----------------------------------------
-# OS + Editor Files
+# Test artifacts (optional based on submission)
 # ----------------------------------------
+tests/
+
+# ----------------------------------------
+# OS + Editor files
+# ----------------------------------------
+.DS_Store
+Thumbs.db
+.idea/
 .vscode/
 *.swp

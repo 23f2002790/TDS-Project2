@@ -1,16 +1,7 @@
 """
-Task Tools Package
+Task tools used by the autonomous quiz solver agent.
 
-This package provides modular helper tools used by the LangGraph agent
-to interact with quiz pages and execute data processing tasks.
-
-Exposed Tools:
---------------
-- get_rendered_html: Load dynamic webpages using Playwright.
-- download_file: Download files needed for analysis.
-- post_request: Submit answers to quiz endpoints.
-- run_code: Execute dynamically generated Python code.
-- add_dependencies: Install missing Python dependencies automatically.
+Each tool is exposed as a LangChain-compatible callable.
 """
 
 from .web_scraper import get_rendered_html
@@ -24,5 +15,5 @@ __all__ = [
     "download_file",
     "post_request",
     "run_code",
-    "add_dependencies"
+    "add_dependencies",
 ]

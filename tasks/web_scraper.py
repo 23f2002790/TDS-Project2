@@ -1,42 +1,31 @@
 from langchain_core.tools import tool
 from playwright.sync_api import sync_playwright
-from bs4 import BeautifulSoup
 
 @tool
 def get_rendered_html(url: str) -> str:
     """
-    Fetch and return the fully rendered HTML of a webpage.
+    Returns fully rendered HTML of a webpage using Playwright.
 
-    This function uses Playwright to load a webpage in a headless Chromium
-    browser, allowing all JavaScript on the page to execute. Use this for
-    dynamic websites that require rendering.
-
-    IMPORTANT RESTRICTIONS:
-    - ONLY use this for actual HTML webpages (articles, documentation, dashboards).
-    - DO NOT use this for direct file links (URLs ending in .csv, .pdf, .zip, .png).
-      Playwright cannot render these and will crash. Use the 'download_file' tool instead.
-
-    Parameters
-    ----------
-    url : str
-        The URL of the webpage to retrieve and render.
-
-    Returns
-    -------
-    str
-        The fully rendered and cleaned HTML content.
+    Use only for real webpages. 
+    Do NOT use for direct file links like CSV/PDF/Images.
     """
-    print("\nFetching and rendering:", url)
+    print("\n➡ Fetching and rendering:", url)
+
+    # Block obvious non-HTML links
+    if url.lower().endswith((".csv", ".pdf", ".xlsx", ".png", ".jpg", ".zip")):
+        return "NOT_HTML_URL"
+
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             page = browser.new_page()
 
             page.goto(url, wait_until="networkidle")
+            html = page.content()
 
-            content = page.content()
+            page.close()
             browser.close()
-            return content
-
+            return html
+            
     except Exception as e:
-        return f"Error fetching/rendering page: {str(e)}"
+        return f"Error loading page: {str(e)}"
